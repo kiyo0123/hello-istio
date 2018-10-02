@@ -1,22 +1,22 @@
-# hello-istio
-こちらを参考に。
+# Istio hello world
+Istioのサンプルこちらを参考に。
 https://github.com/istio/istio/tree/master/samples/helloworld
 
 ## Sidecar Injection
-(Automatic sidecar injection)[https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection] を有効にしていない場合は、istioctl コマンドを使って、sidecar が挿入されたyamlファイルを生成する。
+[Automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) を有効にしていない場合は、istioctl コマンドを使って、sidecar が挿入されたyamlファイルを生成する。元のファイルは純Kubernetes。
 
 ```
 istioctl kube-inject -f helloworld.yaml -o hello-world-istion.yaml
 ```
 
 ## Deploy Application
-
+Istioのsidecarが挿入されたyamlファイルをデプロイする。
 ```
 kubectl create -f helloworld-istio.yaml
 ```
 
+成功すると以下のようなメッセージが出力されて、Kubernetes, Istioのオブジェクトが生成されたことが分かる。
 ```
-$ kubectl create -f helloworld-istio.yaml
 service "helloworld" created
 deployment.extensions "helloworld-v1" created
 deployment.extensions "helloworld-v2" created
@@ -34,6 +34,7 @@ helloworld             helloworld-gateway   *             1        0      defaul
 
 ## Verify Application running
 
+外部からのアクセスエンドポイントはistio-ingressgateway。
 ```
 kubectl get svc istio-ingressgateway -n istio-system
 ```
@@ -76,7 +77,7 @@ helloworld-v1    1         1         1            1           18m
 helloworld-v2    3         3         3            2           18m
 ```
 
-バージョンに関係なく、pod全体に対して負荷をうまく分散している。
+バージョンに関係なく、pod全体に対して負荷をうまく分散していることが分かる。
 ```
 io$ while true; do sleep 2; curl http://$GATEWAY_URL/hello; done
 Hello version: v2, instance: helloworld-v2-f46787f6c-rtjx4
@@ -102,12 +103,27 @@ Hello version: v2, instance: helloworld-v2-f46787f6c-7zzlb
 ```
 kubectl autoscale deployment helloworld-v1 --cpu-percent=50 --min=1 --max=10
 kubectl autoscale deployment helloworld-v2 --cpu-percent=50 --min=1 --max=10
-kubectl get hpa
+```
+
+HPA(Horizontal Pod Autoscaler)の情報を確認する。
+```
+$ kubectl get hpa
+NAME            REFERENCE                  TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+helloworld-v1   Deployment/helloworld-v1   43%/50%         1         10        1          1d
+helloworld-v2   Deployment/helloworld-v2   36%/50%         1         10        1          1d
+istio-pilot     Deployment/istio-pilot     <unknown>/80%   1         5         0          32d
 ```
 
 ## Generate load
 TODO
 普通にMacから 
+
+``` 
+while true; curl http://$GATEWAY_URL/hello; done
+```
+
+
+
 ```
 while true; do wget -q -O- http://$GATEWAY_URL/hello; done
 ```
