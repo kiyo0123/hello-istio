@@ -6,7 +6,7 @@ https://github.com/istio/istio/tree/master/samples/helloworld
 [Automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) を有効にしていない場合は、istioctl コマンドを使って、sidecar が挿入されたyamlファイルを生成する。元のファイルは純Kubernetes。
 
 ```
-istioctl kube-inject -f helloworld.yaml -o hello-world-istio.yaml
+istioctl kube-inject -f helloworld.yaml -o helloworld-istio.yaml
 ```
 
 ## Deploy Application
@@ -15,16 +15,25 @@ Istioのsidecarが挿入されたyamlファイルをデプロイする。
 kubectl create -f helloworld-istio.yaml
 ```
 
-成功すると以下のようなメッセージが出力されて、Kubernetes, Istioのオブジェクトが生成されたことが分かる。
+成功すると以下のようなメッセージが出力されて、KubernetesのService、Deploymentsオブジェクトが生成される。
 ```
 service "helloworld" created
 deployment.extensions "helloworld-v1" created
 deployment.extensions "helloworld-v2" created
+```
+
+続けてIstioのオブジェクトをデプロイする。
+ ```
+ kubectl create -f istio-gateway.yaml
+ ```
+
+成功すると以下のようなメッセージが出力されて、Gateway、VirtualServiceオブジェクトが作成されたことが分かる。
+```
 gateway.networking.istio.io "helloworld-gateway" created
 virtualservice.networking.istio.io "helloworld" created
 ```
 
-virtualservices がデプロイされていることを確認。
+istioclt コマンドを使って、virtualservices がデプロイされていることを確認。
 ```
 $ istioctl get virtualservices helloworld
 VIRTUAL-SERVICE NAME   GATEWAYS             HOSTS     #HTTP     #TCP      NAMESPACE   AGE
