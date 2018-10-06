@@ -6,7 +6,7 @@ https://github.com/istio/istio/tree/master/samples/helloworld
 [Automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) を有効にしていない場合は、istioctl コマンドを使って、sidecar が挿入されたyamlファイルを生成する。元のファイルは純Kubernetes。
 
 ```
-istioctl kube-inject -f helloworld.yaml -o hello-world-istion.yaml
+istioctl kube-inject -f helloworld.yaml -o hello-world-istio.yaml
 ```
 
 ## Deploy Application
