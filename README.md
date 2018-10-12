@@ -2,12 +2,64 @@
 Istioのサンプルこちらを参考に。
 https://github.com/istio/istio/tree/master/samples/helloworld
 
+## Setup GKE cluster
+Make sure that you have the GKE API enabled. 
+```
+gcloud services enable container.googleapis.com
+```
+```
+gcloud config set compute/zone asia-northeast1-a
+```
+
+
+Create a new cluster by using following command. 
+```
+gcloud container clusters create hello-istio \
+    --cluster-version=latest \
+    --num-nodes 4 
+```
+
+grant admin permissions in the cluster to the current user. 
+```
+kubectl create clusterrolebinding cluster-admin-binding \
+   -clusterrole=cluster-admin \
+   -user=(gcloud config get-value core/account)
+```
+
+## Install Istio
+``` 
+curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.2 sh -
+```
+
+```
+cd ./istio-*
+export PATH=$PWD/bin:$PATH
+```
+
+```
+kubectl apply -f install/kubernetes/istio-demo-auth.yaml
+```
+
+Make sure istio component successfully installed.
+```
+kubectl get svc -n istio-system
+```
+```
+kubectl get pods -n istio-system
+```
+
 ## Sidecar Injection
 [Automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) を有効にしていない場合は、istioctl コマンドを使って、sidecar が挿入されたyamlファイルを生成する。元のファイルは純Kubernetes。
 
 ```
 istioctl kube-inject -f helloworld.yaml -o helloworld-istio.yaml
 ```
+
+自動インジェクションを有効にするには以下のようにする。
+```
+kubectl label namespace default istio-injection=enabled
+```
+
 
 ## Deploy Application
 Istioのsidecarが挿入されたyamlファイルをデプロイする。
@@ -24,7 +76,7 @@ deployment.extensions "helloworld-v2" created
 
 続けてIstioのオブジェクトをデプロイする。
  ```
- kubectl create -f istio-gateway.yaml
+ kubectl create -f networking/helloworld-gateway.yaml
  ```
 
 成功すると以下のようなメッセージが出力されて、Gateway、VirtualServiceオブジェクトが作成されたことが分かる。
@@ -128,7 +180,8 @@ TODO
 普通にMacから 
 
 ``` 
-while true; curl http://$GATEWAY_URL/hello; done
+while true; do curl http://$GATEWAY_URL/hello; done
+
 ```
 
 

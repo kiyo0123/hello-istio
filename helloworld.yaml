@@ -10,7 +10,7 @@ spec:
     name: http
   selector:
     app: helloworld
-  type: LoadBalancer #こうするとIstioのIngressとLBがダブルになる？
+  #type: LoadBalancer #こうするとIstioのIngressとLBがダブルになる？
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
